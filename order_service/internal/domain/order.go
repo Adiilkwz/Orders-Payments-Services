@@ -21,7 +21,7 @@ type Order struct {
 }
 
 type OrderRepository interface {
-	Create(*Order) error
+	CreateOrder(*Order) error
 	GetOrderById(id string) (*Order, error)
 	UpdateStatus(id string, status OrderStatus) error
 }
