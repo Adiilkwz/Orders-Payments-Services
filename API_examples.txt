@@ -1,0 +1,55 @@
+POST http://localhost:8080/orders
+JSON body:
+{
+    "customer_id": "cust-001",
+    "item_name": "Gaming Laptop",
+    "amount": 95000
+}
+
+Response: 201 Created
+{
+    "ID": "10f00684-fc19-4a6c-84c6-ec26bc340746",
+    "CustomerID": "cust-001",
+    "ItemName": "Gaming Laptop",
+    "Amount": 95000,
+    "Status": "Paid",
+    "CreatedAt": "2026-04-01T18:29:25.900814+05:00"
+}
+
+GET http://localhost:8080/orders/10f00684-fc19-4a6c-84c6-ec26bc340746
+
+Response: 200 OK
+{
+    "ID": "10f00684-fc19-4a6c-84c6-ec26bc340746",
+    "CustomerID": "cust-001",
+    "ItemName": "Gaming Laptop",
+    "Amount": 95000,
+    "Status": "Paid",
+    "CreatedAt": "2026-04-01T18:29:25.900814+05:00"
+}
+
+PATCH http://localhost:8080/orders/0d4fc6da-92a1-4b5b-9a54-fbd401b17652/cancel
+
+Response: 400 Bad Request
+{
+    "error": "business rule violation: only 'pending' orders can be cancelled."
+}
+
+GET http://localhost:8081/payments/10f00684-fc19-4a6c-84c6-ec26bc340746
+
+Response: 200 OK
+{
+    "ID": "ed3fdef3-9d85-4bc6-be95-0f2f7562a269",
+    "OrderID": "10f00684-fc19-4a6c-84c6-ec26bc340746",
+    "TransactionID": "25d4f862-fc55-42f4-8834-c67eaf1efd69",
+    "Amount": 95000,
+    "Status": "Authorized"
+}
+
+POST http://localhost:8081/payments
+
+Response: 200 OK
+{
+    "status": "Authorized",
+    "transaction_id": "36124114-a753-425d-9196-ec34601636d8"
+}
