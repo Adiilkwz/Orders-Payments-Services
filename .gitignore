@@ -1,0 +1,14 @@
+order_service/.env
+payment_service/.env
+*.exe
+*.test
+*.out
+api-server
+order_service/api-server
+payment_service/api-server
+order_service/order_service
+payment_service/payment_service
+.vscode/
+Thumbs.db
+.DS_Store
+vendor/
