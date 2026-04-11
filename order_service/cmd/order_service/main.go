@@ -16,36 +16,42 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: No .env file found, relying on system environment variables")
+		log.Println("Warning: No .env file found")
 	}
 
 	db, err := config.ConnectDB()
 	if err != nil {
-		log.Fatalf("Database connection failed: %v", err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
-	log.Println("Successfully connected to the database!")
 
-	paymentURL := os.Getenv("PAYMENT_SERVICE_URL")
-	orderRepo := repository.NewPostgresOrderRepo(db)
-	paymentGateway := client.NewPaymentHTTPClient(paymentURL)
+	paymentTarget := os.Getenv("PAYMENT_SERVICE_URL")
+	if paymentTarget == "" {
+		paymentTarget = "localhost:50051"
+	}
 
-	orderUC := usecase.NewOrderUseCase(orderRepo, paymentGateway)
+	paymentGRPCClient, err := client.NewPaymentGRPCClient(paymentTarget)
+	if err != nil {
+		log.Fatalf("Failed to start gRPC client: %v", err)
+	}
+	log.Printf("Connected to Payment Service via gRPC at %s", paymentTarget)
 
-	orderHandler := http.NewOrderHandler(orderUC)
+	repo := repository.NewPostgresOrderRepo(db)
+	uc := usecase.NewOrderUseCase(repo, paymentGRPCClient)
+	handler := http.NewOrderHandler(uc)
 
 	r := gin.Default()
-	r.POST("/orders", orderHandler.CreateOrder)
-	r.GET("/orders/:id", orderHandler.GetOrder)
-	r.PATCH("/orders/:id/cancel", orderHandler.CancelOrder)
+
+	r.POST("/orders", handler.CreateOrder)
+	r.GET("/orders/:id", handler.GetOrder)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Printf("Starting Order Service on :%s...\n", port)
+	log.Printf("Order Service REST API running on port %s", port)
 	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Failed to run HTTP server: %v", err)
 	}
 }
