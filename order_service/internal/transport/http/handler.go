@@ -1,11 +1,14 @@
 package http
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
+	"order_service/internal/broker"
 	"order_service/internal/domain"
 
+	orderv1 "github.com/Adiilkwz/grpc-generated-go/order/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +19,15 @@ type OrderUseCase interface {
 }
 
 type OrderHandler struct {
+	orderv1.UnimplementedOrderTrackingServiceServer
 	useCase OrderUseCase
+	hub     *broker.Hub
 }
 
-func NewOrderHandler(uc OrderUseCase) *OrderHandler {
+func NewOrderHandler(uc OrderUseCase, hub *broker.Hub) *OrderHandler {
 	return &OrderHandler{
 		useCase: uc,
+		hub:     hub,
 	}
 }
 
@@ -43,7 +49,6 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Payment Service is currently unavailable. Order failed."})
 			return
 		}
-
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -77,4 +82,29 @@ func (h *OrderHandler) CancelOrder(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "order cancelled successfully"})
+}
+
+func (h *OrderHandler) SubscribeToOrderUpdates(req *orderv1.OrderRequest, stream orderv1.OrderTrackingService_SubscribeToOrderUpdatesServer) error {
+	log.Printf("New subscriber to order status: %s", req.OrderId)
+
+	events := h.hub.Subscribe(req.OrderId)
+
+	for {
+		select {
+		case <-stream.Context().Done():
+			log.Printf("The customer canceled the order: %s", req.OrderId)
+			return nil
+
+		case event := <-events:
+			err := stream.Send(&orderv1.OrderStatusUpdate{
+				OrderId: event.OrderID,
+				Status:  event.Status,
+			})
+			if err != nil {
+				log.Printf("Error sending to the stream: %v", err)
+				return err
+			}
+			log.Printf("The update has been sent to the stream for %s: %s", event.OrderID, event.Status)
+		}
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"order_service/internal/broker"
 	"order_service/internal/domain"
 
 	"github.com/google/uuid"
@@ -12,12 +13,14 @@ import (
 type orderUseCase struct {
 	repo    domain.OrderRepository
 	gateway domain.PaymentGateway
+	hub     *broker.Hub
 }
 
-func NewOrderUseCase(repo domain.OrderRepository, gateway domain.PaymentGateway) *orderUseCase {
+func NewOrderUseCase(repo domain.OrderRepository, gateway domain.PaymentGateway, hub *broker.Hub) *orderUseCase {
 	return &orderUseCase{
 		repo:    repo,
 		gateway: gateway,
+		hub:     hub,
 	}
 }
 
@@ -55,6 +58,11 @@ func (u *orderUseCase) CreateOrder(customerID string, itemName string, amount in
 
 	order.Status = finalStatus
 
+	u.hub.Publish(broker.OrderEvent{
+		OrderID: order.ID,
+		Status:  string(order.Status),
+	})
+
 	return order, nil
 }
 
@@ -72,5 +80,15 @@ func (u *orderUseCase) CancelOrder(id string) error {
 		return errors.New("business rule violation: only 'pending' orders can be cancelled.")
 	}
 
-	return u.repo.UpdateStatus(id, domain.StatusCancelled)
+	err = u.repo.UpdateStatus(id, domain.StatusCancelled)
+	if err != nil {
+		return err
+	}
+
+	u.hub.Publish(broker.OrderEvent{
+		OrderID: id,
+		Status:  string(domain.StatusCancelled),
+	})
+
+	return nil
 }
