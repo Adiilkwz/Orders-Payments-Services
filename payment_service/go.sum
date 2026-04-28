@@ -1,5 +1,5 @@
-github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39 h1:WMJjdgGRpFQnymSV2ydyGYF/1qZbjdrhndUdYBPxT5s=
-github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260416072659-d1ca591ab03c h1:EynebATYokvd1qjCdezG9Aqap2/Fx3WauX66yxYguFk=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260416072659-d1ca591ab03c/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=

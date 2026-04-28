@@ -1,16 +1,23 @@
 package usecase
 
 import (
+	"time"
+
 	"payment_service/internal/domain"
 
 	"github.com/google/uuid"
 )
 
+type PaymentUseCase interface {
+	ProcessPayment(orderID string, amount int64) (*domain.Payment, error)
+	ListPayments(status string) ([]*domain.Payment, error)
+}
+
 type paymentUseCase struct {
 	repo domain.PaymentRepository
 }
 
-func NewPaymentUseCase(repo domain.PaymentRepository) *paymentUseCase {
+func NewPaymentUseCase(repo domain.PaymentRepository) PaymentUseCase {
 	return &paymentUseCase{
 		repo: repo,
 	}
@@ -18,9 +25,10 @@ func NewPaymentUseCase(repo domain.PaymentRepository) *paymentUseCase {
 
 func (u *paymentUseCase) ProcessPayment(orderID string, amount int64) (*domain.Payment, error) {
 	payment := &domain.Payment{
-		ID:      uuid.New().String(),
-		OrderID: orderID,
-		Amount:  amount,
+		ID:        uuid.New().String(),
+		OrderID:   orderID,
+		Amount:    amount,
+		CreatedAt: time.Now(),
 	}
 
 	if amount > 100000 {
@@ -38,6 +46,6 @@ func (u *paymentUseCase) ProcessPayment(orderID string, amount int64) (*domain.P
 	return payment, nil
 }
 
-func (u *paymentUseCase) GetPaymentStatus(orderID string) (*domain.Payment, error) {
-	return u.repo.GetByOrderID(orderID)
+func (u *paymentUseCase) ListPayments(status string) ([]*domain.Payment, error) {
+	return u.repo.ListByStatus(status)
 }

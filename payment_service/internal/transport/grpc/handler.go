@@ -21,6 +21,7 @@ type PaymentHandler struct {
 type PaymentUseCaseInterface interface {
 	ProcessPayment(orderID string, amount int64) (*domain.Payment, error)
 	GetPaymentStatus(orderID string) (*domain.Payment, error)
+	ListPayments(status string) ([]*domain.Payment, error)
 }
 
 func NewPaymentHandler(uc PaymentUseCaseInterface) *PaymentHandler {
@@ -41,5 +42,25 @@ func (h *PaymentHandler) ProcessPayment(ctx context.Context, req *paymentv1.Paym
 		TransactionId: payment.TransactionID,
 		Status:        string(payment.Status),
 		ProcessedAt:   timestamppb.New(time.Now()),
+	}, nil
+}
+
+func (h *PaymentHandler) ListPayments(ctx context.Context, req *paymentv1.ListPaymentRequest) (*paymentv1.ListPaymentResponse, error) {
+	payments, err := h.useCase.ListPayments(req.Status)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch payments: %v", err)
+	}
+
+	var pbPayments []*paymentv1.PaymentResponse
+	for _, p := range payments {
+		pbPayments = append(pbPayments, &paymentv1.PaymentResponse{
+			TransactionId: p.ID,
+			Status:        string(p.Status),
+			ProcessedAt:   timestamppb.New(p.CreatedAt),
+		})
+	}
+
+	return &paymentv1.ListPaymentResponse{
+		Payments: pbPayments,
 	}, nil
 }

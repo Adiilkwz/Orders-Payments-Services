@@ -3,7 +3,7 @@ module payment_service
 go 1.25.3
 
 require (
-	github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39
+	github.com/Adiilkwz/grpc-generated-go v0.0.0-20260416072659-d1ca591ab03c
 	github.com/google/uuid v1.6.0
 	google.golang.org/protobuf v1.36.11
 )
