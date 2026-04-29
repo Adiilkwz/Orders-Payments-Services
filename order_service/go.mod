@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39
+	github.com/Adiilkwz/grpc-generated-go v0.0.0-20260428165452-d857e7f7436d
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect

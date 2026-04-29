@@ -12,12 +12,13 @@ const (
 )
 
 type Order struct {
-	ID         string
-	CustomerID string
-	ItemName   string
-	Amount     int64
-	Status     OrderStatus
-	CreatedAt  time.Time
+	ID            string
+	CustomerID    string
+	ItemName      string
+	Amount        int64
+	CustomerEmail string
+	Status        OrderStatus
+	CreatedAt     time.Time
 }
 
 type OrderRepository interface {

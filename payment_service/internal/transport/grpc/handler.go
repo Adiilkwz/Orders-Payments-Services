@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"payment_service/internal/domain"
@@ -19,8 +20,7 @@ type PaymentHandler struct {
 }
 
 type PaymentUseCaseInterface interface {
-	ProcessPayment(orderID string, amount int64) (*domain.Payment, error)
-	GetPaymentStatus(orderID string) (*domain.Payment, error)
+	ProcessPayment(orderID string, amount int64, customerEmail string) (*domain.Payment, error)
 	ListPayments(status string) ([]*domain.Payment, error)
 }
 
@@ -33,7 +33,9 @@ func (h *PaymentHandler) ProcessPayment(ctx context.Context, req *paymentv1.Paym
 		return nil, status.Errorf(codes.InvalidArgument, "amount must be greater than 0")
 	}
 
-	payment, err := h.useCase.ProcessPayment(req.OrderId, req.Amount)
+	log.Printf("➡️ 3. gRPC Handler: Получили email из сети: '%s'", req.CustomerEmail)
+
+	payment, err := h.useCase.ProcessPayment(req.OrderId, req.Amount, req.CustomerEmail)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "payment processing failed: %v", err)
 	}

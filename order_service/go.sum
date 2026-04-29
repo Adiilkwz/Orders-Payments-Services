@@ -1,5 +1,7 @@
 github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39 h1:WMJjdgGRpFQnymSV2ydyGYF/1qZbjdrhndUdYBPxT5s=
 github.com/Adiilkwz/grpc-generated-go v0.0.0-20260410132049-edec6c70cd39/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260428165452-d857e7f7436d h1:OCbVIdHuCU5/vBnxJ4pIUxSeV8Mti+eTwlDE3AIkikQ=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260428165452-d857e7f7436d/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
 github.com/bytedance/gopkg v0.1.3 h1:TPBSwH8RsouGCBcMBktLt1AymVo2TVsBVCY4b6TnZ/M=
 github.com/bytedance/gopkg v0.1.3/go.mod h1:576VvJ+eJgyCzdjS+c4+77QF3p7ubbtiKARP3TxducM=
 github.com/bytedance/sonic v1.15.0 h1:/PXeWFaR5ElNcVE84U0dOHjiMHQOwNIx3K4ymzh/uSE=

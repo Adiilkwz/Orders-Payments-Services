@@ -6,5 +6,5 @@ type PaymentResult struct {
 }
 
 type PaymentGateway interface {
-	ProcessPayment(orderID string, amount int64) (*PaymentResult, error)
+	ProcessPayment(orderID string, amount int64, customerEmail string) (*PaymentResult, error)
 }

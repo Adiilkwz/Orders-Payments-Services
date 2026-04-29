@@ -1,5 +1,5 @@
-github.com/Adiilkwz/grpc-generated-go v0.0.0-20260416072659-d1ca591ab03c h1:EynebATYokvd1qjCdezG9Aqap2/Fx3WauX66yxYguFk=
-github.com/Adiilkwz/grpc-generated-go v0.0.0-20260416072659-d1ca591ab03c/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260428165452-d857e7f7436d h1:OCbVIdHuCU5/vBnxJ4pIUxSeV8Mti+eTwlDE3AIkikQ=
+github.com/Adiilkwz/grpc-generated-go v0.0.0-20260428165452-d857e7f7436d/go.mod h1:9JqkmapQiEfLitA2hdd5LJ2tjaUkq6X3UOlFI2dUo8M=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
@@ -16,6 +16,8 @@ github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
 github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/lib/pq v1.12.1 h1:x1nbl/338GLqeDJ/FAiILallhAsqubLzEZu/pXtHUow=
 github.com/lib/pq v1.12.1/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
+github.com/rabbitmq/amqp091-go v1.11.0 h1:HxIctVm9Gid/Vtn706necmZ7Wj6pgGI2eqplRbEY8O8=
+github.com/rabbitmq/amqp091-go v1.11.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.39.0 h1:8yPrr/S0ND9QEfTfdP9V+SiwT4E0G7Y5MO7p85nis48=

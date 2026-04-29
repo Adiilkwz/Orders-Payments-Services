@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"order_service/internal/broker"
@@ -24,18 +25,19 @@ func NewOrderUseCase(repo domain.OrderRepository, gateway domain.PaymentGateway,
 	}
 }
 
-func (u *orderUseCase) CreateOrder(customerID string, itemName string, amount int64) (*domain.Order, error) {
+func (u *orderUseCase) CreateOrder(customerID string, customerEmail string, itemName string, amount int64) (*domain.Order, error) {
 	if amount <= 0 {
 		return nil, errors.New("invalid order: amount must be greater than 0")
 	}
 
 	order := &domain.Order{
-		ID:         uuid.New().String(),
-		CustomerID: customerID,
-		ItemName:   itemName,
-		Amount:     amount,
-		Status:     domain.StatusPending,
-		CreatedAt:  time.Now(),
+		ID:            uuid.New().String(),
+		CustomerID:    customerID,
+		ItemName:      itemName,
+		Amount:        amount,
+		CustomerEmail: customerEmail,
+		Status:        domain.StatusPending,
+		CreatedAt:     time.Now(),
 	}
 
 	err := u.repo.CreateOrder(order)
@@ -43,7 +45,9 @@ func (u *orderUseCase) CreateOrder(customerID string, itemName string, amount in
 		return nil, err
 	}
 
-	paymentResult, paymentErr := u.gateway.ProcessPayment(order.ID, order.Amount)
+	log.Printf("➡️ 2. UseCase: Отправляем email в gRPC: '%s'", customerEmail)
+
+	paymentResult, paymentErr := u.gateway.ProcessPayment(order.ID, order.Amount, order.CustomerEmail)
 
 	finalStatus := domain.StatusFailed
 

@@ -28,13 +28,14 @@ func NewPaymentGRPCClient(targetAddress string) (*PaymentGRPCClient, error) {
 	return &PaymentGRPCClient{client: c}, nil
 }
 
-func (p *PaymentGRPCClient) ProcessPayment(orderID string, amount int64) (*domain.PaymentResult, error) {
+func (p *PaymentGRPCClient) ProcessPayment(orderID string, amount int64, customerEmail string) (*domain.PaymentResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	req := &paymentv1.PaymentRequest{
-		OrderId: orderID,
-		Amount:  amount,
+		OrderId:       orderID,
+		Amount:        amount,
+		CustomerEmail: customerEmail,
 	}
 
 	res, err := p.client.ProcessPayment(ctx, req)

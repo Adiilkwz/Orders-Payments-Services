@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"payment_service/internal/broker"
 	"payment_service/internal/config"
 	"payment_service/internal/repository"
 	transport "payment_service/internal/transport/grpc"
@@ -27,8 +28,14 @@ func main() {
 	}
 	defer db.Close()
 
+	rabbitPublisher, err := broker.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+	defer rabbitPublisher.Close()
+
 	repo := repository.NewPostgresPaymentRepo(db)
-	uc := usecase.NewPaymentUseCase(repo)
+	uc := usecase.NewPaymentUseCase(repo, rabbitPublisher)
 
 	grpcHandler := transport.NewPaymentHandler(uc)
 

@@ -12,8 +12,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type CreateOrderRequest struct {
+	CustomerID    string `json:"customer_id" binding:"required"`
+	CustomerEmail string `json:"customer_email" binding:"required"`
+	ItemName      string `json:"item_name" binding:"required"`
+	Amount        int64  `json:"amount" binding:"required"`
+}
+
 type OrderUseCase interface {
-	CreateOrder(customerID string, itemName string, amount int64) (*domain.Order, error)
+	CreateOrder(customerID string, customerEmail string, itemName string, amount int64) (*domain.Order, error)
 	GetByOrderID(id string) (*domain.Order, error)
 	CancelOrder(id string) error
 }
@@ -33,9 +40,10 @@ func NewOrderHandler(uc OrderUseCase, hub *broker.Hub) *OrderHandler {
 
 func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	var req struct {
-		CustomerID string `json:"customer_id" binding:"required"`
-		ItemName   string `json:"item_name" binding:"required"`
-		Amount     int64  `json:"amount" binding:"required"`
+		CustomerID    string `json:"customer_id" binding:"required"`
+		CustomerEmail string `json:"customer_email" binding:"required"`
+		ItemName      string `json:"item_name" binding:"required"`
+		Amount        int64  `json:"amount" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,7 +51,9 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	order, err := h.useCase.CreateOrder(req.CustomerID, req.ItemName, req.Amount)
+	log.Printf("➡️ 1. Handler: Спарсили email из Postman: '%s'", req.CustomerEmail)
+
+	order, err := h.useCase.CreateOrder(req.CustomerID, req.CustomerEmail, req.ItemName, req.Amount)
 	if err != nil {
 		if strings.Contains(err.Error(), "payment service unavailable") || strings.Contains(err.Error(), "timed out") {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Payment Service is currently unavailable. Order failed."})
