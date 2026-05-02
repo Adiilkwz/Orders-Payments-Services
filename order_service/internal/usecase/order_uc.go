@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"order_service/internal/broker"
@@ -44,8 +43,6 @@ func (u *orderUseCase) CreateOrder(customerID string, customerEmail string, item
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("➡️ 2. UseCase: Отправляем email в gRPC: '%s'", customerEmail)
 
 	paymentResult, paymentErr := u.gateway.ProcessPayment(order.ID, order.Amount, order.CustomerEmail)
 

@@ -1,5 +1,6 @@
 order_service/.env
 payment_service/.env
+notification_service/.env
 *.exe
 *.test
 *.out

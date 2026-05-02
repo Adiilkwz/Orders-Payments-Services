@@ -51,8 +51,6 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	log.Printf("➡️ 1. Handler: Спарсили email из Postman: '%s'", req.CustomerEmail)
-
 	order, err := h.useCase.CreateOrder(req.CustomerID, req.CustomerEmail, req.ItemName, req.Amount)
 	if err != nil {
 		if strings.Contains(err.Error(), "payment service unavailable") || strings.Contains(err.Error(), "timed out") {

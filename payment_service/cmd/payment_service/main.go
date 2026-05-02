@@ -28,7 +28,9 @@ func main() {
 	}
 	defer db.Close()
 
-	rabbitPublisher, err := broker.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/")
+	amqpURL := os.Getenv("AMQP_URL")
+
+	rabbitPublisher, err := broker.NewRabbitMQPublisher(amqpURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}

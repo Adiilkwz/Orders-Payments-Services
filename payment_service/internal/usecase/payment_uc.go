@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"log"
 	"time"
 
 	"payment_service/internal/broker"
@@ -46,8 +45,6 @@ func (u *paymentUseCase) ProcessPayment(orderID string, amount int64, customerEm
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("➡️ 4. Publisher: Кладем email в RabbitMQ: '%s'", customerEmail)
 
 	if payment.Status == domain.StatusAuthorized {
 		event := broker.PaymentCompletedEvent{

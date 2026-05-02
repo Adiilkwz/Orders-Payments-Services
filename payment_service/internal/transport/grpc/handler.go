@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"payment_service/internal/domain"
@@ -32,8 +31,6 @@ func (h *PaymentHandler) ProcessPayment(ctx context.Context, req *paymentv1.Paym
 	if req.Amount <= 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "amount must be greater than 0")
 	}
-
-	log.Printf("➡️ 3. gRPC Handler: Получили email из сети: '%s'", req.CustomerEmail)
 
 	payment, err := h.useCase.ProcessPayment(req.OrderId, req.Amount, req.CustomerEmail)
 	if err != nil {

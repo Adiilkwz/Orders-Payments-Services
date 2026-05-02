@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -17,8 +19,16 @@ type PaymentCompletedEvent struct {
 	Status        string `json:"status"`
 }
 
+var processedEvents sync.Map
+
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found")
+	}
+
+	amqpURL := os.Getenv("AMQP_URL")
+
+	conn, err := amqp.Dial(amqpURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
@@ -55,7 +65,7 @@ func main() {
 		log.Fatalf("Failed to register consumer: %v", err)
 	}
 
-	log.Println("⏳ [Notification Service] started and are waiting for message. Press Ctrl+C for exit.")
+	log.Println("[Notification Service] started and are waiting for message. Press Ctrl+C for exit.")
 
 	go func() {
 		for d := range msgs {
@@ -68,8 +78,18 @@ func main() {
 				continue
 			}
 
-			log.Printf("📧 [Notification] Sent email to %s for Order #%s. Amount: $%d",
+			_, alreadyProcessed := processedEvents.Load(event.OrderID)
+
+			if alreadyProcessed {
+				log.Printf("[Idempotency] Duplicate! Email for order #%s was already sent.", event.OrderID)
+				d.Ack(false)
+				continue
+			}
+
+			log.Printf("[Notification] Sent email to %s for Order #%s. Amount: $%d",
 				event.CustomerEmail, event.OrderID, event.Amount)
+
+			processedEvents.Store(event.OrderID, true)
 
 			d.Ack(false)
 		}
