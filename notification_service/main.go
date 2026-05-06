@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -28,9 +29,20 @@ func main() {
 
 	amqpURL := os.Getenv("AMQP_URL")
 
-	conn, err := amqp.Dial(amqpURL)
+	var conn *amqp.Connection
+	var err error
+
+	for i := 1; i <= 20; i++ {
+		conn, err = amqp.Dial(amqpURL)
+		if err == nil {
+			log.Println("Successfully connected to RabbitMQ!")
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		log.Fatalf("Failed to connect to RabbitMQ after 20 attempts: %v", err)
 	}
 	defer conn.Close()
 

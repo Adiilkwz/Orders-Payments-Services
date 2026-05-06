@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -22,9 +24,23 @@ type RabbitMQPublisher struct {
 }
 
 func NewRabbitMQPublisher(url string) (*RabbitMQPublisher, error) {
-	conn, err := amqp.Dial(url)
-	if err != nil {
-		return nil, err
+	var conn *amqp.Connection
+	var err error
+
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found or error loading it")
+	}
+
+	amqpURL := os.Getenv("AMQP_URL")
+
+	for i := 1; i <= 20; i++ {
+		conn, err = amqp.Dial(amqpURL)
+		if err == nil {
+			log.Println("[Payment] Успешно подключились к RabbitMQ!")
+			break
+		}
+		log.Printf("[Payment] RabbitMQ еще не готов (попытка %d/20)...", i)
+		time.Sleep(5 * time.Second)
 	}
 
 	ch, err := conn.Channel()
