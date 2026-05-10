@@ -1,26 +1,33 @@
 package usecase
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	"order_service/internal/broker"
 	"order_service/internal/domain"
 
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type orderUseCase struct {
 	repo    domain.OrderRepository
 	gateway domain.PaymentGateway
 	hub     *broker.Hub
+	redis   *redis.Client
 }
 
-func NewOrderUseCase(repo domain.OrderRepository, gateway domain.PaymentGateway, hub *broker.Hub) *orderUseCase {
+func NewOrderUseCase(repo domain.OrderRepository, gateway domain.PaymentGateway, hub *broker.Hub, redis *redis.Client) *orderUseCase {
 	return &orderUseCase{
 		repo:    repo,
 		gateway: gateway,
 		hub:     hub,
+		redis:   redis,
 	}
 }
 
@@ -68,7 +75,38 @@ func (u *orderUseCase) CreateOrder(customerID string, customerEmail string, item
 }
 
 func (u *orderUseCase) GetByOrderID(id string) (*domain.Order, error) {
-	return u.repo.GetOrderById(id)
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("order:%s", id)
+
+	cachedData, err := u.redis.Get(ctx, cacheKey).Result()
+
+	if err == nil {
+		var order domain.Order
+		if err := json.Unmarshal([]byte(cachedData), &order); err == nil {
+			log.Printf("[Cache HIT] Order %s was taken from Redis", id)
+			return &order, nil
+		}
+		log.Printf("Cache parsing error %s: %v", id, err)
+	} else if err != redis.Nil {
+		log.Printf("Redis connection error: %v", err)
+	}
+
+	order, err := u.repo.GetOrderById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	orderJSON, marshalErr := json.Marshal(order)
+	if marshalErr == nil {
+		ttl := 5 * time.Minute
+		if setErr := u.redis.Set(ctx, cacheKey, orderJSON, ttl).Err(); setErr != nil {
+			log.Printf("Failed to save order %s into cache: %v", id, setErr)
+		} else {
+			log.Printf("[Cache MISS] Order %s was taken from DB and saved to Redis", id)
+		}
+	}
+
+	return order, nil
 }
 
 func (u *orderUseCase) CancelOrder(id string) error {
@@ -84,6 +122,15 @@ func (u *orderUseCase) CancelOrder(id string) error {
 	err = u.repo.UpdateStatus(id, domain.StatusCancelled)
 	if err != nil {
 		return err
+	}
+
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("order:%s", id)
+
+	if err := u.redis.Del(ctx, cacheKey).Err(); err != nil {
+		log.Printf("Failed to delete cache for order %s: %v", id, err)
+	} else {
+		log.Printf("[Cache INVALIDATED] Cache for order %s cleared due to cancellation", id)
 	}
 
 	u.hub.Publish(broker.OrderEvent{

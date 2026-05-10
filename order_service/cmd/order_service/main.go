@@ -30,6 +30,12 @@ func main() {
 	}
 	defer db.Close()
 
+	redis, err := config.ConnectRedis()
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer redis.Close()
+
 	paymentTarget := os.Getenv("PAYMENT_SERVICE_URL")
 	if paymentTarget == "" {
 		paymentTarget = "localhost:50051"
@@ -45,7 +51,7 @@ func main() {
 
 	repo := repository.NewPostgresOrderRepo(db)
 
-	uc := usecase.NewOrderUseCase(repo, paymentGRPCClient, hub)
+	uc := usecase.NewOrderUseCase(repo, paymentGRPCClient, hub, redis)
 	handler := http.NewOrderHandler(uc, hub)
 
 	grpcPort := "50052"
