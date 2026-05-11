@@ -67,7 +67,7 @@ func (c *Consumer) Start() error {
 
 			err := c.uc.ProcessPayment(event)
 			if err != nil {
-				log.Printf("Error processing payment: %v", err)
+				log.Printf("Critical error processing payment: %v", err)
 			}
 
 			d.Ack(false)

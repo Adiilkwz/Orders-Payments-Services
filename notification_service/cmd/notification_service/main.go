@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"notification_service/internal/broker"
+	"notification_service/internal/config"
 	"notification_service/internal/domain"
 	"notification_service/internal/provider"
 	"notification_service/internal/usecase"
@@ -31,7 +32,13 @@ func main() {
 		log.Println("Initialized SIMULATED email provider (Expect random failures!)")
 	}
 
-	uc := usecase.NewNotificationUseCase(emailProvider)
+	redisClient, err := config.ConnectRedis()
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer redisClient.Close()
+
+	uc := usecase.NewNotificationUseCase(emailProvider, redisClient)
 
 	consumer, err := broker.NewConsumer(amqpURL, uc)
 	if err != nil {
