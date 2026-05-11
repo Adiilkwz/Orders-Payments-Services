@@ -36,10 +36,10 @@ func NewRabbitMQPublisher(url string) (*RabbitMQPublisher, error) {
 	for i := 1; i <= 20; i++ {
 		conn, err = amqp.Dial(amqpURL)
 		if err == nil {
-			log.Println("[Payment] Успешно подключились к RabbitMQ!")
+			log.Println("[Payment] Successfully connected to RabbitMQ")
 			break
 		}
-		log.Printf("[Payment] RabbitMQ еще не готов (попытка %d/20)...", i)
+		log.Printf("[Payment] RabbitMQ is not ready yet (attempt %d/20)...", i)
 		time.Sleep(5 * time.Second)
 	}
 

@@ -19,7 +19,7 @@ func ConnectRedis() (*redis.Client, error) {
 	})
 
 	if err := client.Ping(context.Background()).Err(); err != nil {
-		return nil, fmt.Errorf("failed to connect to redis: %w", err)
+		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
 
 	return client, nil
