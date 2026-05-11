@@ -7,6 +7,8 @@ import (
 	"syscall"
 
 	"notification_service/internal/broker"
+	"notification_service/internal/domain"
+	"notification_service/internal/provider"
 	"notification_service/internal/usecase"
 
 	"github.com/joho/godotenv"
@@ -19,7 +21,17 @@ func main() {
 
 	amqpURL := os.Getenv("AMQP_URL")
 
-	uc := usecase.NewNotificationUseCase()
+	var emailProvider domain.EmailProvider
+	providerMode := os.Getenv("PROVIDER_MODE")
+
+	if providerMode == "REAL" {
+		log.Println("Initialized REAL email provider")
+	} else {
+		emailProvider = provider.NewSimulatedEmailSender()
+		log.Println("Initialized SIMULATED email provider (Expect random failures!)")
+	}
+
+	uc := usecase.NewNotificationUseCase(emailProvider)
 
 	consumer, err := broker.NewConsumer(amqpURL, uc)
 	if err != nil {

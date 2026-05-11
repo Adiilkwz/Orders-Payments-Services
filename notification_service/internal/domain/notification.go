@@ -7,6 +7,10 @@ type PaymentCompletedEvent struct {
 	Status        string `json:"status"`
 }
 
+type EmailProvider interface {
+	Send(to string, orderID string, amount int64) error
+}
+
 type NotificationUseCase interface {
 	ProcessPayment(event PaymentCompletedEvent) error
 }

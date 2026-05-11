@@ -9,10 +9,13 @@ import (
 
 type notificationUseCase struct {
 	processedEvents sync.Map
+	emailProvider   domain.EmailProvider
 }
 
-func NewNotificationUseCase() domain.NotificationUseCase {
-	return &notificationUseCase{}
+func NewNotificationUseCase(emailProvider domain.EmailProvider) domain.NotificationUseCase {
+	return &notificationUseCase{
+		emailProvider: emailProvider,
+	}
 }
 
 func (u *notificationUseCase) ProcessPayment(event domain.PaymentCompletedEvent) error {
@@ -20,6 +23,12 @@ func (u *notificationUseCase) ProcessPayment(event domain.PaymentCompletedEvent)
 	if alreadyProcessed {
 		log.Printf("[Idempotency] Duplicate! Email for order #%s was already sent.", event.OrderID)
 		return nil
+	}
+
+	err := u.emailProvider.Send(event.CustomerEmail, event.OrderID, event.Amount)
+	if err != nil {
+		log.Printf("Failed to send email: %v", err)
+		return err
 	}
 
 	log.Printf("[Notification] Sent email to %s for Order #%s. Amount: $%d",
