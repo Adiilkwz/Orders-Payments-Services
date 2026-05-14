@@ -34,11 +34,11 @@ func (u *notificationUseCase) ProcessPayment(event domain.PaymentCompletedEvent)
 		return fmt.Errorf("redis connection error: %v", err)
 	}
 	if !isNew {
-		log.Printf("🛡️ [Idempotency] Duplicate blocked by Redis! Email for order #%s was already processed.", event.OrderID)
+		log.Printf("[Idempotency] Duplicate blocked by Redis! Email for order #%s was already processed.", event.OrderID)
 		return nil
 	}
 
-	maxRetries := 3
+	maxRetries := 5
 	var sendErr error
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {

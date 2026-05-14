@@ -48,6 +48,15 @@ func (c *Consumer) Start() error {
 		return err
 	}
 
+	err = c.ch.Qos(
+		100,
+		0,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
 	msgs, err := c.ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return err
@@ -57,20 +66,22 @@ func (c *Consumer) Start() error {
 
 	go func() {
 		for d := range msgs {
-			var event domain.PaymentCompletedEvent
+			go func(msg amqp.Delivery) {
+				var event domain.PaymentCompletedEvent
 
-			if err := json.Unmarshal(d.Body, &event); err != nil {
-				log.Printf("JSON parsing error: %v", err)
-				d.Ack(false)
-				continue
-			}
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					log.Printf("JSON parsing error: %v", err)
+					msg.Ack(false)
+					return
+				}
 
-			err := c.uc.ProcessPayment(event)
-			if err != nil {
-				log.Printf("Critical error processing payment: %v", err)
-			}
+				err := c.uc.ProcessPayment(event)
+				if err != nil {
+					log.Printf("Critical error processing payment: %v", err)
+				}
 
-			d.Ack(false)
+				msg.Ack(false)
+			}(d)
 		}
 	}()
 
